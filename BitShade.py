@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 #
 #  BitShade - file cipher and encoder 
-#  Copyright © 2015 Carlo Tegano
+#  Copyright  2015 Carlo Tegano
 # 
 #  "BitShade" is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -435,22 +435,22 @@ class App(tk.Frame):
         frEntries.grid(row=1, padx=10, pady=10, sticky='we')
         ####
         #input file
-        iFileLbl = tk.Label(frEntries, text='Input file:', bg=bs.theme.lightest)
+        iFileLbl = tk.Label(frEntries, text='입력 파일:', bg=bs.theme.lightest)
         self.iFileEnt = tk.Entry(frEntries, width=50)
         iFileLbl.grid(row=0, column=1, pady=10)
         self.iFileEnt.grid(row=0, column=2, pady=10)
-        b5 = tk.Button(frEntries, text='Browse', bg=bs.theme.light, width=8,
+        b5 = tk.Button(frEntries, text='불러오기', bg=bs.theme.light, width=8,
                        command=(lambda : self.openFileDialog(self.iFileEnt)))
         b5.grid(row=0, column=3, padx=5)
         self.imgInFile = tk.PhotoImage(data=bs.theme.gifInFile)
         labInFile =tk.Label(frEntries,image=self.imgInFile,bg=bs.theme.lightest)
         labInFile.grid(row=0, column=0, pady=10)
         #output file
-        oFileLbl = tk.Label(frEntries, text='Output file:',bg=bs.theme.lightest)
+        oFileLbl = tk.Label(frEntries, text='출력 파일:',bg=bs.theme.lightest)
         self.oFileEnt = tk.Entry(frEntries, width=50)
         oFileLbl.grid(row=1, column=1, pady=10)
         self.oFileEnt.grid(row=1, column=2, pady=10)
-        b6 = tk.Button(frEntries, text='Browse', bg=bs.theme.light, width=8,
+        b6 = tk.Button(frEntries, text='불러오기', bg=bs.theme.light, width=8,
                        command=(lambda: self.openSaveFileDialog(self.oFileEnt)))
         b6.grid(row=1, column=3, padx=5)
         self.imgOutFile = tk.PhotoImage(data=bs.theme.gifOutFile)
@@ -459,12 +459,12 @@ class App(tk.Frame):
         labOutFile.grid(row=1, column=0)
         frButtNames = tk.Frame(frEntries, bg=bs.theme.lightest)
         frButtNames.grid(row=3, column=2, padx=5, pady=5, sticky='we')
-        bSwitch = tk.Button(frButtNames, text='Switch input with output', 
+        bSwitch = tk.Button(frButtNames, text='입력, 출력 바꾸기', 
                             bg=bs.theme.light, compound='left', 
                             command=(lambda: self.switch(
                                      self.iFileEnt, self.oFileEnt)))
         bSwitch.grid(row=0, column=1, sticky='we')
-        bAutoName = tk.Button(frButtNames, text='Name output file', 
+        bAutoName = tk.Button(frButtNames, text='출력 파일 자동 지정', 
                               bg=bs.theme.light, compound='left',
                               command=(lambda: self.name(
                                        self.iFileEnt, self.oFileEnt)))
@@ -472,14 +472,14 @@ class App(tk.Frame):
         self.onTheFly = tk.IntVar()
         self.onTheFly.set(0)
         self.onTheFly.trace('w', self.doOnTheFly)
-        chbOnTheFly = tk.Checkbutton(frButtNames, text='On The Fly', 
+        chbOnTheFly = tk.Checkbutton(frButtNames, text='문자열 암호화', 
                                      highlightthickness=0, bg=bs.theme.lightest, 
                                      variable=self.onTheFly, anchor='w')
         chbOnTheFly.grid(row=0, column=3, sticky='we')
         wckToolTips.register(chbOnTheFly, 
-                             ("Encrypt / Decrypt a string on the fly\n" + 
-                              "< ctrl-e >    Encrypt\n" + 
-                              "< ctrl-d >    Decrypt"))        
+                             ("문자열을 암호화/복호화\n" + 
+                              "< ctrl-e >    암호화\n" + 
+                              "< ctrl-d >    복호화"))        
         #Frame Encoding
         ###############
         frEncoding = tk.Frame(self, bg=bs.theme.lightest, relief=tk.RAISED,bd=3)
@@ -489,16 +489,16 @@ class App(tk.Frame):
         labEncodingTitle = tk.Label(frEncoding, text='Encoding', font="bold", 
                                     bg=bs.theme.darkest, fg='white')
         labEncodingTitle.grid(row=0, sticky='we', columnspan=2)
-        txt = 'Encode or Decode to or from base64 string'
+        txt = 'base64 문자열로 인코딩/디코딩'
         labEncodingInfo = tk.Label(frEncoding, text=txt, anchor='w', 
                                    bg=bs.theme.lightest, fg=bs.theme.dark)
         labEncodingInfo.grid(row=1, columnspan=2, pady=3)
         frEncDecButt = tk.Frame(frEncoding, bg=bs.theme.lightest)
         frEncDecButt.grid(row=2, padx=10, pady=5)
-        b1 = tk.Button(frEncDecButt, text='Encode', command=self.encodeFile, 
+        b1 = tk.Button(frEncDecButt, text='인코딩', command=self.encodeFile, 
                        width=12, bg=bs.theme.light)
         b1.grid(row=0, column=0, padx=5)
-        b2 = tk.Button(frEncDecButt, text='Decode', command=self.decodeFile, 
+        b2 = tk.Button(frEncDecButt, text='디코딩', command=self.decodeFile, 
                        width=12, bg=bs.theme.light)
         b2.grid(row=0, column=1, padx=5)
         
@@ -509,10 +509,10 @@ class App(tk.Frame):
         frEncryption.grid_columnconfigure(0, weight=1)
         ####
         labEncryptionTitle = tk.Label(frEncryption, 
-                                      text='Encryption', bg=bs.theme.darkest,
+                                      text='암호화', bg=bs.theme.darkest,
                                       fg='white',font="bold")
         labEncryptionTitle.grid(sticky='we')
-        txt = 'Encrypt or Decrypt using Advanced Encryption Standard (AES)'
+        txt = 'Advanced Encryption Standard (AES)방식으로 암호화/복호화'
         labEncryInfo = tk.Label(frEncryption, text=txt, anchor='w', 
                                 bg=bs.theme.lightest, fg=bs.theme.dark)
         labEncryInfo.grid(pady=3)
@@ -522,7 +522,7 @@ class App(tk.Frame):
         #
         self.lock_image = tk.PhotoImage(data=bs.theme.gifKey)
         labLockIcon = tk.Label(frPassword, image=self.lock_image)
-        labPwd = tk.Label(frPassword, text='Passphrase:', width=12, 
+        labPwd = tk.Label(frPassword, text='비밀번호:', width=12, 
                           bg=bs.theme.lightest)
         self.entPwd = tk.Entry(frPassword, width=32, show='*')
         labLockIcon.grid(row=1, column=0, padx=5)
@@ -535,15 +535,15 @@ class App(tk.Frame):
         #
         chbPwdNote = tk.Checkbutton(frPwdFile, bg=bs.theme.lightest,
                                     highlightthickness=0,
-                                    text='Combine password with a key file',
+                                    text='키파일 사용',
                                     variable=self.useKeyFile, anchor='w')
         self.imgPwdFile = tk.PhotoImage(data=bs.theme.gifKeyFile)
         labPwdFileIcon = tk.Label(frPwdFile, image=self.imgPwdFile, 
                                   bg=bs.theme.light)
-        labPwdFile = tk.Label(frPwdFile, text='Key file:', width=12, 
+        labPwdFile = tk.Label(frPwdFile, text='키파일:', width=12, 
                               bg=bs.theme.lightest)
         self.entPwdFile = tk.Entry(frPwdFile, width=46)
-        butPwdFile = tk.Button(frPwdFile, text='Browse', bg=bs.theme.light, 
+        butPwdFile = tk.Button(frPwdFile, text='불러오기', bg=bs.theme.light, 
                                command=self.openPwdKeyFileDialog, width=8)
         chbPwdNote.grid(row=0, column=2,sticky='w')
         labPwdFileIcon.grid(row=1, column=0, padx=5)
@@ -556,11 +556,11 @@ class App(tk.Frame):
         frStrBin.grid()
         self.typeStrBin = tk.StringVar()
         self.typeStrBin.set('binary')
-        rbTypeBin = tk.Radiobutton(frStrBin, text="Binary", value='binary', 
+        rbTypeBin = tk.Radiobutton(frStrBin, text="실행파일", value='binary', 
                                    variable=self.typeStrBin, bg=bs.theme.light, 
                                    width=12)
         wckToolTips.register(rbTypeBin, 'Output file in binary form')
-        rbTypeStr = tk.Radiobutton(frStrBin, text="Text (utf-8)", 
+        rbTypeStr = tk.Radiobutton(frStrBin, text="문자파일 (utf-8)", 
                                    variable=self.typeStrBin,
                                    value='utf-8', width=12, bg=bs.theme.light)
         wckToolTips.register(rbTypeStr, 'Output file in text form')
@@ -571,23 +571,23 @@ class App(tk.Frame):
         ##########################
         frButtEncrypt = tk.Frame(frEncryption, bg=bs.theme.lightest)
         frButtEncrypt.grid(row=5, pady=5)
-        self.bEncr = tk.Button(frButtEncrypt, text='Encrypt', 
+        self.bEncr = tk.Button(frButtEncrypt, text='암호화', 
                                width=12, bg=bs.theme.light)
         self.bEncr.grid(row=1, column=0, padx=5)
-        self.bDecr = tk.Button(frButtEncrypt, text='Decrypt', width=12, 
+        self.bDecr = tk.Button(frButtEncrypt, text='복호화', width=12, 
                                bg=bs.theme.light)
         self.bDecr.grid(row=1, column=1, padx=5)
-        bView = tk.Button(frButtEncrypt, text='View', width=12, 
+        bView = tk.Button(frButtEncrypt, text='결과보기', width=12, 
                           bg=bs.theme.light, command=(lambda arg='on_the_fly': 
                                                       self.decryptFile(arg)))
         bView.grid(row=1, column=2, padx=5)
-        bViewTip = ('Decript and show content of input file')
+        bViewTip = ('입력파일을 열어봅니다.')
         wckToolTips.register(bView, bViewTip)
-        bEdit = tk.Button(frButtEncrypt, text='Edit', bg=bs.theme.light,
+        bEdit = tk.Button(frButtEncrypt, text='편집', bg=bs.theme.light,
                           width=12,command=(lambda arg='on_the_fly_edit': 
                                             self.decryptFile(arg)))
         bEdit.grid(row=1, column=3, padx=5)
-        bEditTip = ('Decrypt and edit input file')
+        bEditTip = ('입력파일을 편집합니다.')
         wckToolTips.register(bEdit, bEditTip)
             
         #Frame quit
@@ -595,12 +595,12 @@ class App(tk.Frame):
         frQuit = tk.Frame(self, bg=bs.theme.normal)
         frQuit.grid(row=6, sticky='we', padx=20)
         self.imgQuit = tk.PhotoImage(data=bs.theme.gifQuit)
-        self.b3 = tk.Button(frQuit, text='Quit',command=root.quit, width=80, 
+        self.b3 = tk.Button(frQuit, text='종료',command=root.quit, width=80, 
                             compound='left', image=self.imgQuit, 
                             bg=bs.theme.light)
         self.b3.grid(row=1, column=0, padx=5, pady=10)
         self.imgAbout = tk.PhotoImage(data=bs.theme.gifAbout)
-        b6 = tk.Button(frQuit, text='About', bg=bs.theme.light, width=80,
+        b6 = tk.Button(frQuit, text='BitShade란?', bg=bs.theme.light, width=80,
                        command=(lambda : self.callbackButtAbout()),
                        compound='left', image=self.imgAbout)
         b6.grid(row=1, column=1, pady=10)
@@ -612,4 +612,4 @@ if __name__ == '__main__':
     root.resizable(0,0)
     app = App(root)
     root.bind('<Control-w>',(lambda arg: root.quit()))
-    root.mainloop()
+    app.mainloop()
