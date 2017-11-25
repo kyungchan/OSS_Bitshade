@@ -27,6 +27,8 @@ import webbrowser
 import wckToolTips
 import hashlib
 import base64
+from urllib.parse import quote
+from urllib.parse import unquote
 from subprocess import call
 import sys
 import bstheme as bs
@@ -198,6 +200,23 @@ class App(tk.Frame):
                 showerror('File Error', e)
         else:
             showerror('File error', 'Missing file path!')
+
+    def encodeFile2(self, *args):
+        iF = self.iFileEnt.get()
+        oF = self.oFileEnt.get()
+        if iF and oF:
+            try:
+                   fIn = open(iF, "r")  
+                   fOut = open(oF, "w")
+                   a=fIn.readline()
+                   b= quote(a)
+                   fOut.write(b)
+                   fOut.close()
+            except FileNotFoundError as e:
+                showerror('File Error', e)
+        else:
+            showerror('File error', 'Missing file path!')
+
                            
     def decodeFile(self, *args):
         iF = self.iFileEnt.get()
@@ -211,7 +230,25 @@ class App(tk.Frame):
         else:
             showerror('File error', 'Missing file path!')
             return None
-    
+
+    def decodeFile2(self, *args):
+        iF = self.iFileEnt.get()
+        oF = self.oFileEnt.get()
+        if iF and oF:
+            try:
+                   fIn = open(iF, "r")  
+                   fOut = open(oF, "w")
+                   a=fIn.readline()
+                   b= unquote(a)
+                   fOut.write(b)
+                   fOut.close()
+            except Exception as e:
+                showerror('', e)
+        else:
+            showerror('File error', 'Missing file path!')
+            return None
+
+
     def emailEncodedFile(self, oFile):
         call(['thunderbird', '-compose', "attachment=" + self.oFileEnt.get()
               + ",format=1"
@@ -489,18 +526,31 @@ class App(tk.Frame):
         labEncodingTitle = tk.Label(frEncoding, text='Encoding', font="bold", 
                                     bg=bs.theme.darkest, fg='white')
         labEncodingTitle.grid(row=0, sticky='we', columnspan=2)
-        txt = 'base64 문자열로 인코딩/디코딩'
+        txt = 'base64 문자열로 인코딩/디코딩                        persent 문자열로 인코딩/디코딩'
+
         labEncodingInfo = tk.Label(frEncoding, text=txt, anchor='w', 
                                    bg=bs.theme.lightest, fg=bs.theme.dark)
         labEncodingInfo.grid(row=1, columnspan=2, pady=3)
+        
         frEncDecButt = tk.Frame(frEncoding, bg=bs.theme.lightest)
-        frEncDecButt.grid(row=2, padx=10, pady=5)
+        frEncDecButt.grid(row=2, padx=20, pady=5)
         b1 = tk.Button(frEncDecButt, text='인코딩', command=self.encodeFile, 
                        width=12, bg=bs.theme.light)
         b1.grid(row=0, column=0, padx=5)
+
         b2 = tk.Button(frEncDecButt, text='디코딩', command=self.decodeFile, 
                        width=12, bg=bs.theme.light)
         b2.grid(row=0, column=1, padx=5)
+
+        b3 = tk.Button(frEncDecButt, text='인코딩', command=self.encodeFile2, 
+                       width=12, bg=bs.theme.light)
+        b3.grid(row=0, column=2, padx=5)
+        
+        b4 = tk.Button(frEncDecButt, text='디코딩', command=self.decodeFile2, 
+                       width=12, bg=bs.theme.light)
+        b4.grid(row=0, column=3, padx=5)
+
+
         
         # Frame encryption
         ##################
