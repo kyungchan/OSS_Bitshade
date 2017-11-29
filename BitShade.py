@@ -23,6 +23,8 @@ vers = "1.0"
 import tkinter as tk
 import tkinter.filedialog as tkfd
 from tkinter.messagebox import showerror
+from tkinter import *
+import tkinter.messagebox
 import webbrowser
 import wckToolTips
 import hashlib
@@ -38,6 +40,13 @@ try:
 except ImportError as e:
     print(e)
     showerror('Error', 'Installation problem: cannot import Crypto module')
+
+#------------------------------알림창 기능 추가-----------------------------------
+def Message1():
+	tkinter.messagebox.showinfo("알림!","암호화를 완료하였습니다.")
+
+def Message2():
+	tkinter.messagebox.showinfo("알림!","복호화를 완료하였습니다.")
           
 #size of pwd generated from key file
 kBS = 32   
@@ -621,10 +630,10 @@ class App(tk.Frame):
         ##########################
         frButtEncrypt = tk.Frame(frEncryption, bg=bs.theme.lightest)
         frButtEncrypt.grid(row=5, pady=5)
-        self.bEncr = tk.Button(frButtEncrypt, text='암호화', 
+        self.bEncr = tk.Button(frButtEncrypt, text='암호화', command=Message1,
                                width=12, bg=bs.theme.light)
         self.bEncr.grid(row=1, column=0, padx=5)
-        self.bDecr = tk.Button(frButtEncrypt, text='복호화', width=12, 
+        self.bDecr = tk.Button(frButtEncrypt, text='복호화', width=12, command=Message2,
                                bg=bs.theme.light)
         self.bDecr.grid(row=1, column=1, padx=5)
         bView = tk.Button(frButtEncrypt, text='결과보기', width=12, 
