@@ -166,6 +166,7 @@ class App(tk.Frame):
                     encrytext = self.encrypt(plaintext, 
                                              self.typeStrBin.get())
                     fOut.write(encrytext)
+                    tkinter.messagebox.showinfo("알림!","암호화를 완료하였습니다.")
             else:
                 showerror('File error', 'Missing file path!')
                 return None
@@ -191,6 +192,7 @@ class App(tk.Frame):
                 elif len(args) > 0 and args[0] == 'on_the_fly_edit':
                     txt = plaintext.decode('utf-8')
                     self.openTxtEdit(txt)
+                tkinter.messagebox.showinfo("알림!","복호화를 완료하였습니다.")
         except UnicodeDecodeError as e:
             msg = (str(e) + "\n\nWrong password or key file \n" + 
                     "or improper binary/text selection")
@@ -630,10 +632,10 @@ class App(tk.Frame):
         ##########################
         frButtEncrypt = tk.Frame(frEncryption, bg=bs.theme.lightest)
         frButtEncrypt.grid(row=5, pady=5)
-        self.bEncr = tk.Button(frButtEncrypt, text='암호화', command=Message1,
+        self.bEncr = tk.Button(frButtEncrypt, text='암호화',
                                width=12, bg=bs.theme.light)
         self.bEncr.grid(row=1, column=0, padx=5)
-        self.bDecr = tk.Button(frButtEncrypt, text='복호화', width=12, command=Message2,
+        self.bDecr = tk.Button(frButtEncrypt, text='복호화', width=12,
                                bg=bs.theme.light)
         self.bDecr.grid(row=1, column=1, padx=5)
         bView = tk.Button(frButtEncrypt, text='결과보기', width=12, 
