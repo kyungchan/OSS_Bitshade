@@ -180,7 +180,7 @@ class App(tk.Frame):
                 # decrypt
                 plaintext = self.decrypt(encrytext, self.typeStrBin.get())
                 # Write to output file if decryptFile called with no args
-                if len(args) == 0:
+                if args[0] != 'on_the_fly' and args[0] != 'on_the_fly_edit':
                     oF = self.oFileEnt.get()
                     with open(oF, "wb") as fOut:
                         fOut.write(plaintext)
