@@ -18,7 +18,7 @@
 #
 
 ''' Version 1.0-20151114 '''
-vers = "1.0"
+vers = "2.0"
 
 import tkinter as tk
 import tkinter.filedialog as tkfd
@@ -52,11 +52,10 @@ class dialogAboutTool():
         mess =  ('Encrypting and Encoding Tool\n' +
                  'Released under the GPL v3.0')  
         disclaimer = ('\n'+
-                'This software is distributed in the\n'
-                'hope that it will be useful,\n' +
-                'but WITHOUT ANY WARRANTY; without\n' +
-                'even the implied warranty of MERCHANTABILITY\n' +
-                'or FITNESS FOR A PARTICULAR PURPOSE.\n')
+                '이 프로젝트는 Carlo Tegano가 만든 Bitshade를\n'
+                '명지대학교 공개SW 6조가 수정한 프로젝트 입니다.\n' +
+                '명지대학교 공개SW 6조\n' +
+                '김경찬 박민구 전민기')
         tlInfo = tk.Toplevel()
         tlInfo.title("About Bitshade")
         lbInfo0 = tk.Label(tlInfo, pady=10, font="bold", text=toolTitle)
@@ -160,7 +159,7 @@ class App(tk.Frame):
         else:
             return None
                  
-    def decrypt(self, encrytext, mode):
+    def decryptAes(self, encrytext, mode):
         pwd = self.buildPwd()
         if pwd:
             # File was base64 encoded after the encryption
@@ -170,6 +169,21 @@ class App(tk.Frame):
             cipher = AES.new(hashlib.sha256(bytes(pwd,'utf-8')).digest(), 
                              AES.MODE_CFB, IV)
             plaintext = cipher.decrypt(encrytext[16:])
+            return plaintext
+
+    def decryptBlow(self, encrytext, mode):
+        pwd = self.buildPwd()
+        if pwd:
+            bs = Blowfish.block_size
+            # File was base64 encoded after the encryption
+            if mode == 'utf-8':
+                encrytext = base64.b64decode(encrytext)
+            IV = encrytext[:bs]
+            cipher = Blowfish.new(hashlib.sha256(bytes(pwd,'utf-8')).digest(),
+                                  Blowfish.MODE_CBC, IV)
+            plaintext = cipher.decrypt(encrytext[bs:])
+            last_byte = plaintext[-1]
+            plaintext = plaintext[:- (last_byte if type(last_byte) is int else ord(last_byte))]
             return plaintext
 
     def encryptFile(self, *args):
@@ -202,13 +216,17 @@ class App(tk.Frame):
             with open(iF, "rb") as fIn:
                 encrytext = fIn.read()
                 # decrypt
-                plaintext = self.decrypt(encrytext, self.typeStrBin.get())
+                if self.typeAesBlw.get() == "aes":
+                       plaintext = self.decryptAes(encrytext, self.typeStrBin.get())
+                       tkinter.messagebox.showinfo("알림!","AES 복호화를 완료하였습니다.")
+                elif self.typeAesBlw.get() == "blowfish":
+                       plaintext = self.decryptBlow(encrytext, self.typeStrBin.get())
+                       tkinter.messagebox.showinfo("알림!","BLOWFISH 복호화를 완료하였습니다.")
                 # Write to output file if decryptFile called with no args
                 if args[0] != 'on_the_fly' and args[0] != 'on_the_fly_edit':
                     oF = self.oFileEnt.get()
                     with open(oF, "wb") as fOut:
                         fOut.write(plaintext)
-                        tkinter.messagebox.showinfo("알림!","복호화를 완료하였습니다.")
                 # show decrypted file content in a text widget if required
                 elif len(args) > 0 and args[0] == 'on_the_fly':
                     txt = plaintext.decode('utf-8')
@@ -415,7 +433,7 @@ class App(tk.Frame):
             self.bDecr.bind("<Button-1>", self.decryptFile) 
         
     def encryptOnTheFly(self, *args):
-        plaintext = self.plaintxtWidget.get(1.0,'end').encode("utf-8")
+        plaintext = self.plaintxtWidget.get(1.0,'end').encode('utf-8')
         encrytext = ''
         if self.typeAesBlw.get() == 'aes':
             encrytext = self.encryptAes(plaintext, 'utf-8')
@@ -425,10 +443,17 @@ class App(tk.Frame):
         self.encrytxtWidget.insert(tk.END, encrytext)
           
     def decryptOnTheFly(self, *args):
-        encrytext = self.encrytxtWidget.get(1.0,'end')
-        plaintext = self.decrypt(encrytext, "utf-8")
+        encrytext = self.encrytxtWidget.get(1.0,'end').encode('utf-8')
+
+        if self.typeAesBlw.get() == "aes":
+            plaintext = self.decryptAes(encrytext, 'utf-8')
+            tkinter.messagebox.showinfo("알림!","AES 복호화를 완료하였습니다.")
+        elif self.typeAesBlw.get() == "blowfish":
+            plaintext = self.decryptBlow(encrytext, 'utf-8')
+            tkinter.messagebox.showinfo("알림!","BLOWFISH 암호화를 완료하였습니다.")
+        
         self.plaintxtWidget.delete(1.0, tk.END)
-        self.plaintxtWidget.insert(tk.END, plaintext)
+        self.plaintxtWidget.insert(tk.END, plaintext.decode('utf-8'))
     
     def openOnTheFlyPlaintxt(self):
         tlViewer = tk.Toplevel(bg=bs.theme.light)
