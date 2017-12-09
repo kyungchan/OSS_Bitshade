@@ -207,6 +207,7 @@ class App(tk.Frame):
             try:
                 with open(iF, "rb") as fIn, open(oF, "wb") as fOut:
                     base64.encode(fIn, fOut)
+                    tkinter.messagebox.showinfo("알림!","인코딩을 완료하였습니다.")
             except FileNotFoundError as e:
                 showerror('File Error', e)
         else:
@@ -223,6 +224,7 @@ class App(tk.Frame):
                    b= quote(a)
                    fOut.write(b)
                    fOut.close()
+                   tkinter.messagebox.showinfo("알림!","인코딩을 완료하였습니다.")
             except FileNotFoundError as e:
                 showerror('File Error', e)
         else:
@@ -236,6 +238,7 @@ class App(tk.Frame):
             try:
                 with open(iF, "rb") as fIn, open(oF, "wb") as fOut:
                     base64.decode(fIn, fOut)
+                    tkinter.messagebox.showinfo("알림!","디코딩을 완료하였습니다.")
             except Exception as e:
                 showerror('', e)
         else:
@@ -253,6 +256,7 @@ class App(tk.Frame):
                    b= unquote(a)
                    fOut.write(b)
                    fOut.close()
+                   tkinter.messagebox.showinfo("알림!","디코딩을 완료하였습니다.")
             except Exception as e:
                 showerror('', e)
         else:
