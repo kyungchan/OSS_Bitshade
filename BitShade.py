@@ -31,7 +31,9 @@ import hashlib
 import base64
 from urllib.parse import quote
 from urllib.parse import unquote
+from Crypto.Cipher import Blowfish
 from subprocess import call
+from struct import pack
 import sys
 import bstheme as bs
 try:
@@ -42,12 +44,6 @@ except ImportError as e:
     showerror('Error', 'Installation problem: cannot import Crypto module')
 
 #------------------------------알림창 기능 추가-----------------------------------
-def Message1():
-	tkinter.messagebox.showinfo("알림!","암호화를 완료하였습니다.")
-
-def Message2():
-	tkinter.messagebox.showinfo("알림!","복호화를 완료하였습니다.")
-          
 #size of pwd generated from key file
 kBS = 32   
 
@@ -119,11 +115,33 @@ class App(tk.Frame):
             else:
                 pwd = simplePwd   
         else:
-            showerror('Password error', 'Missing password!')
+            showerror('오류', '비밀번호를 지정하지 않았습니다.')
             pwd = ''
         return pwd
-        
-    def encrypt(self, plaintext, mode):
+    
+    def encryptBlow(self, plaintext, mode):
+        pwd = self.buildPwd()
+        if pwd:
+            bs = Blowfish.block_size
+            IV = Random.new().read(bs)
+            # generate the key and create cipher object
+            cipher = Blowfish.new(hashlib.sha256(bytes(pwd,'utf-8')).digest(),
+                                  Blowfish.MODE_CBC, IV)
+            plen = bs - divmod(len(plaintext),bs)[1]
+            padding = [plen]*plen
+            padding = pack('b'*plen, *padding)
+            encrytext = cipher.encrypt(plaintext + padding)
+            # Encrypt and then encodeFile to base64 string
+            if mode == 'utf-8':
+                encrytext = base64.b64encode(IV + encrytext)
+                # Encrypt but not encodeFile to string
+            elif mode == 'binary':
+                encrytext = IV + encrytext
+            return encrytext
+        else:
+            return None
+ 
+    def encryptAes(self, plaintext, mode):
         pwd = self.buildPwd()
         if pwd:
             IV = Random.new().read(16)
@@ -153,7 +171,7 @@ class App(tk.Frame):
                              AES.MODE_CFB, IV)
             plaintext = cipher.decrypt(encrytext[16:])
             return plaintext
-        
+
     def encryptFile(self, *args):
         try:
             iF = self.iFileEnt.get()
@@ -162,13 +180,18 @@ class App(tk.Frame):
                 with open(iF, "rb") as fIn, open(oF, "wb") as fOut:
                     # read input as string
                     plaintext = fIn.read()
-                    #encryptFile
-                    encrytext = self.encrypt(plaintext, 
+                    if self.typeAesBlw.get() == "aes":
+                        encrytext = self.encryptAes(plaintext, 
                                              self.typeStrBin.get())
-                    fOut.write(encrytext)
-                    tkinter.messagebox.showinfo("알림!","암호화를 완료하였습니다.")
+                        fOut.write(encrytext)
+                        tkinter.messagebox.showinfo("알림!","AES 암호화를 완료하였습니다.")
+                    elif self.typeAesBlw.get() == "blowfish":
+                        encrytext = self.encryptBlow(plaintext, 
+                                             self.typeStrBin.get())
+                        fOut.write(encrytext)
+                        tkinter.messagebox.showinfo("알림!","BLOWFISH 암호화를 완료하였습니다.")
             else:
-                showerror('File error', 'Missing file path!')
+                showerror('오류', '파일경로를 지정하지 않았습니다.')
                 return None
         except FileNotFoundError as e:
             showerror('File Error', e)            
@@ -185,6 +208,7 @@ class App(tk.Frame):
                     oF = self.oFileEnt.get()
                     with open(oF, "wb") as fOut:
                         fOut.write(plaintext)
+                        tkinter.messagebox.showinfo("알림!","복호화를 완료하였습니다.")
                 # show decrypted file content in a text widget if required
                 elif len(args) > 0 and args[0] == 'on_the_fly':
                     txt = plaintext.decode('utf-8')
@@ -192,10 +216,10 @@ class App(tk.Frame):
                 elif len(args) > 0 and args[0] == 'on_the_fly_edit':
                     txt = plaintext.decode('utf-8')
                     self.openTxtEdit(txt)
-                tkinter.messagebox.showinfo("알림!","복호화를 완료하였습니다.")
+                
         except UnicodeDecodeError as e:
-            msg = (str(e) + "\n\nWrong password or key file \n" + 
-                    "or improper binary/text selection")
+            msg = (str(e) + "\n\n비밀번호나 키파일이 다르거나 \n" + 
+                    "실행파일/문자파일 지정이 잘못되었습니다.")
             showerror('decryptFile()', msg)
         except FileNotFoundError as e:
             showerror('decryptFile()', str(e))
@@ -211,7 +235,7 @@ class App(tk.Frame):
             except FileNotFoundError as e:
                 showerror('File Error', e)
         else:
-            showerror('File error', 'Missing file path!')
+            showerror('File error', '파일경로를 지정하지 않았습니다.')
 
     def encodeFile2(self, *args):
         iF = self.iFileEnt.get()
@@ -228,7 +252,7 @@ class App(tk.Frame):
             except FileNotFoundError as e:
                 showerror('File Error', e)
         else:
-            showerror('File error', 'Missing file path!')
+            showerror('File error', '파일경로를 지정하지 않았습니다.')
 
                            
     def decodeFile(self, *args):
@@ -242,7 +266,7 @@ class App(tk.Frame):
             except Exception as e:
                 showerror('', e)
         else:
-            showerror('File error', 'Missing file path!')
+            showerror('File error', '파일경로를 지정하지 않았습니다.')
             return None
 
     def decodeFile2(self, *args):
@@ -260,7 +284,7 @@ class App(tk.Frame):
             except Exception as e:
                 showerror('', e)
         else:
-            showerror('File error', 'Missing file path!')
+            showerror('File error', '파일경로를 지정하지 않았습니다.')
             return None
 
 
@@ -284,12 +308,15 @@ class App(tk.Frame):
                     # read input as string from txt entry
                     plaintext = txtWidget.get(1.0,'end')
                     #encryptFile
-                    encrytext = self.encrypt(plaintext, self.typeStrBin.get())
+                    if self.typeAesBlw.get() == 'aes':
+                        encrytext = self.encryptAes(plaintext, 'utf-8')
+                    elif self.typeAesBlw.get() == 'blowfish':
+                        encrytext = self.encryptBlow(plaintext, 'utf-8')
                     fOut.write(encrytext)
             except FileNotFoundError as e:
                 showerror('File error', e)
         else:
-            showerror('File error', 'Missing file path!')       
+            showerror('오류', '파일지정을 하지 않았습니다.')       
     
     def switch(self, fromEntry, toEntry):
         fromName = fromEntry.get()
@@ -388,8 +415,12 @@ class App(tk.Frame):
             self.bDecr.bind("<Button-1>", self.decryptFile) 
         
     def encryptOnTheFly(self, *args):
-        plaintext = self.plaintxtWidget.get(1.0,'end')
-        encrytext = self.encrypt(plaintext, "utf-8")
+        plaintext = self.plaintxtWidget.get(1.0,'end').encode("utf-8")
+        encrytext = ''
+        if self.typeAesBlw.get() == 'aes':
+            encrytext = self.encryptAes(plaintext, 'utf-8')
+        elif self.typeAesBlw.get() == 'blowfish':
+            encrytext = self.encryptBlow(plaintext, 'utf-8')
         self.encrytxtWidget.delete(1.0, tk.END)
         self.encrytxtWidget.insert(tk.END, encrytext)
           
@@ -401,7 +432,7 @@ class App(tk.Frame):
     
     def openOnTheFlyPlaintxt(self):
         tlViewer = tk.Toplevel(bg=bs.theme.light)
-        tlViewer.title("PLAIN TEXT")
+        tlViewer.title("암호화할 문자")
         frame = tk.Frame(tlViewer, pady=10, bg=bs.theme.light)
         txtViewer = tk.Text(frame, width=80, height=20)
         scrViewer = tk.Scrollbar(frame)
@@ -416,7 +447,7 @@ class App(tk.Frame):
     
     def openOnTheFlyEncrytxt(self):
         tlEdit = tk.Toplevel(bg=bs.theme.light)
-        tlEdit.title("ENCRYPTED TEXT")
+        tlEdit.title("암호화한 문자")
         frame = tk.Frame(tlEdit, pady=10, bg=bs.theme.light)
         txtEdit = tk.Text(frame, width=80, height=20)
         scrEdit = tk.Scrollbar(frame)
@@ -429,7 +460,7 @@ class App(tk.Frame):
         
     def openTxtViewer(self, txt):
         tlViewer = tk.Toplevel(bg=bs.theme.light)
-        tlViewer.title("Decrypted content")
+        tlViewer.title("복호화 결과")
         frame = tk.Frame(tlViewer, pady=10, bg=bs.theme.light)
         txtViewer = tk.Text(frame, width=80, height=20)
         txtViewer.insert(tk.END, txt)
@@ -449,7 +480,7 @@ class App(tk.Frame):
         
     def openTxtEdit(self, txt):
         tlEdit = tk.Toplevel(bg=bs.theme.light)
-        tlEdit.title("Edit input file")
+        tlEdit.title("입력파일 수정")
         frame = tk.Frame(tlEdit, pady=10, bg=bs.theme.light)
         txtEdit = tk.Text(frame, width=80, height=20)
         txtEdit.insert(tk.END, txt)
@@ -462,14 +493,14 @@ class App(tk.Frame):
         #
         frButt = tk.Frame(frame, bg=bs.theme.light)
         frButt.grid(row=2, sticky='we', pady=5)
-        bOverwrite = tk.Button(frButt, text='Overwrite existing', 
+        bOverwrite = tk.Button(frButt, text='파일 덮어쓰기', 
                                width=14, bg=bs.theme.light, fg='red',
                                command=(lambda arg1=txtEdit, arg2='overwrite': 
                                         self.save(arg1, arg2)))
         bOverwrite.grid(row=0, column=0, padx=5)
         bOverwriteTip = ('Encrypts and OVERWRITES input file')
         wckToolTips.register(bOverwrite, bOverwriteTip)
-        bSaveCopy = tk.Button(frButt, text='Save a copy', 
+        bSaveCopy = tk.Button(frButt, text='복사본 저장', 
                               width=14, bg=bs.theme.light, 
                               command=(lambda arg1=txtEdit, arg2='savecopy':
                                        self.save(arg1, arg2)))
@@ -538,10 +569,10 @@ class App(tk.Frame):
         frEncoding.grid(row=3, padx=10, pady=5, sticky='we')
         frEncoding.grid_columnconfigure(0, weight=1)
         ####
-        labEncodingTitle = tk.Label(frEncoding, text='Encoding', font="bold", 
+        labEncodingTitle = tk.Label(frEncoding, text='인코딩', font="bold", 
                                     bg=bs.theme.darkest, fg='white')
         labEncodingTitle.grid(row=0, sticky='we', columnspan=2)
-        txt = 'base64 문자열로 인코딩/디코딩                        persent 문자열로 인코딩/디코딩'
+        txt = 'base64 인코딩/디코딩                        percent 인코딩/디코딩'
 
         labEncodingInfo = tk.Label(frEncoding, text=txt, anchor='w', 
                                    bg=bs.theme.lightest, fg=bs.theme.dark)
@@ -577,7 +608,10 @@ class App(tk.Frame):
                                       text='암호화', bg=bs.theme.darkest,
                                       fg='white',font="bold")
         labEncryptionTitle.grid(sticky='we')
-        txt = 'Advanced Encryption Standard (AES)방식으로 암호화/복호화'
+        # Frame AES/BLOWFISH selection
+      
+        
+        txt = 'AES/BLOWFISH 방식으로 암호화'
         labEncryInfo = tk.Label(frEncryption, text=txt, anchor='w', 
                                 bg=bs.theme.lightest, fg=bs.theme.dark)
         labEncryInfo.grid(pady=3)
@@ -619,18 +653,30 @@ class App(tk.Frame):
         # Frame string/binary selection
         frStrBin = tk.Frame(frEncryption, bg=bs.theme.lightest)
         frStrBin.grid()
+        self.typeAesBlw = tk.StringVar()
+        self.typeAesBlw.set('aes')
         self.typeStrBin = tk.StringVar()
         self.typeStrBin.set('binary')
+        rbTypeAes = tk.Radiobutton(frStrBin, text="AES 방식", value='aes', 
+                                   variable=self.typeAesBlw, bg=bs.theme.light, 
+                                   width=12)
+        wckToolTips.register(rbTypeAes, 'AES 방식으로 암호화/복호화')
+        rbTypeBlw = tk.Radiobutton(frStrBin, text="BLOWFISH 방식", 
+                                   variable=self.typeAesBlw,
+                                   value='blowfish', width=12, bg=bs.theme.light)
+        wckToolTips.register(rbTypeBlw, 'BLOWFISH 방식으로 암호화/복호화')
         rbTypeBin = tk.Radiobutton(frStrBin, text="실행파일", value='binary', 
                                    variable=self.typeStrBin, bg=bs.theme.light, 
                                    width=12)
-        wckToolTips.register(rbTypeBin, 'Output file in binary form')
+        wckToolTips.register(rbTypeBin, '실행파일 형식으로 처리')
         rbTypeStr = tk.Radiobutton(frStrBin, text="문자파일 (utf-8)", 
                                    variable=self.typeStrBin,
                                    value='utf-8', width=12, bg=bs.theme.light)
-        wckToolTips.register(rbTypeStr, 'Output file in text form')
-        rbTypeBin.grid(row=0, column=0, pady=20, padx=5)
-        rbTypeStr.grid(row=0, column=1, pady=20, padx=5)
+        wckToolTips.register(rbTypeStr, '문자파일 형식으로 처리')
+        rbTypeBin.grid(row=0, column=0, pady=5, padx=5)
+        rbTypeStr.grid(row=0, column=1, pady=5, padx=5)
+        rbTypeAes.grid(row=1, column=0, pady=5, padx=5)
+        rbTypeBlw.grid(row=1, column=1, pady=5, padx=5)
         
         # Frame encryption buttons
         ##########################
@@ -646,13 +692,13 @@ class App(tk.Frame):
                           bg=bs.theme.light, command=(lambda arg='on_the_fly': 
                                                       self.decryptFile(arg)))
         bView.grid(row=1, column=2, padx=5)
-        bViewTip = ('입력파일을 열어봅니다.')
+        bViewTip = ('입력파일을 복호화해서 열어봅니다.')
         wckToolTips.register(bView, bViewTip)
         bEdit = tk.Button(frButtEncrypt, text='편집', bg=bs.theme.light,
                           width=12,command=(lambda arg='on_the_fly_edit': 
                                             self.decryptFile(arg)))
         bEdit.grid(row=1, column=3, padx=5)
-        bEditTip = ('입력파일을 편집합니다.')
+        bEditTip = ('입력파일을 복호화해서 편집합니다.')
         wckToolTips.register(bEdit, bEditTip)
             
         #Frame quit
