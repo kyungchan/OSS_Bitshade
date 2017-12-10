@@ -136,6 +136,7 @@ class App(tk.Frame):
                 # Encrypt but not encodeFile to string
             elif mode == 'binary':
                 encrytext = IV + encrytext
+            tkinter.messagebox.showinfo("알림!","BLOWFISH 암호화를 완료하였습니다.")
             return encrytext
         else:
             return None
@@ -155,6 +156,7 @@ class App(tk.Frame):
                 # Encrypt but not encodeFile to string
             elif mode == 'binary':
                 encrytext = IV + encrytext
+            tkinter.messagebox.showinfo("알림!","AES 암호화를 완료하였습니다.")
             return encrytext
         else:
             return None
@@ -169,6 +171,7 @@ class App(tk.Frame):
             cipher = AES.new(hashlib.sha256(bytes(pwd,'utf-8')).digest(), 
                              AES.MODE_CFB, IV)
             plaintext = cipher.decrypt(encrytext[16:])
+            tkinter.messagebox.showinfo("알림!","AES 복호화를 완료하였습니다.")
             return plaintext
 
     def decryptBlow(self, encrytext, mode):
@@ -184,6 +187,7 @@ class App(tk.Frame):
             plaintext = cipher.decrypt(encrytext[bs:])
             last_byte = plaintext[-1]
             plaintext = plaintext[:- (last_byte if type(last_byte) is int else ord(last_byte))]
+            tkinter.messagebox.showinfo("알림!","BLOWFISH 복호화를 완료하였습니다.")
             return plaintext
 
     def encryptFile(self, *args):
@@ -198,12 +202,10 @@ class App(tk.Frame):
                         encrytext = self.encryptAes(plaintext, 
                                              self.typeStrBin.get())
                         fOut.write(encrytext)
-                        tkinter.messagebox.showinfo("알림!","AES 암호화를 완료하였습니다.")
                     elif self.typeAesBlw.get() == "blowfish":
                         encrytext = self.encryptBlow(plaintext, 
                                              self.typeStrBin.get())
                         fOut.write(encrytext)
-                        tkinter.messagebox.showinfo("알림!","BLOWFISH 암호화를 완료하였습니다.")
             else:
                 showerror('오류', '파일경로를 지정하지 않았습니다.')
                 return None
@@ -218,10 +220,8 @@ class App(tk.Frame):
                 # decrypt
                 if self.typeAesBlw.get() == "aes":
                        plaintext = self.decryptAes(encrytext, self.typeStrBin.get())
-                       tkinter.messagebox.showinfo("알림!","AES 복호화를 완료하였습니다.")
                 elif self.typeAesBlw.get() == "blowfish":
                        plaintext = self.decryptBlow(encrytext, self.typeStrBin.get())
-                       tkinter.messagebox.showinfo("알림!","BLOWFISH 복호화를 완료하였습니다.")
                 # Write to output file if decryptFile called with no args
                 if args[0] != 'on_the_fly' and args[0] != 'on_the_fly_edit':
                     oF = self.oFileEnt.get()
@@ -447,10 +447,8 @@ class App(tk.Frame):
 
         if self.typeAesBlw.get() == "aes":
             plaintext = self.decryptAes(encrytext, 'utf-8')
-            tkinter.messagebox.showinfo("알림!","AES 복호화를 완료하였습니다.")
         elif self.typeAesBlw.get() == "blowfish":
             plaintext = self.decryptBlow(encrytext, 'utf-8')
-            tkinter.messagebox.showinfo("알림!","BLOWFISH 암호화를 완료하였습니다.")
         
         self.plaintxtWidget.delete(1.0, tk.END)
         self.plaintxtWidget.insert(tk.END, plaintext.decode('utf-8'))
