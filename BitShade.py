@@ -240,7 +240,7 @@ class App(tk.Frame):
                     "실행파일/문자파일 지정이 잘못되었습니다.")
             showerror('decryptFile()', msg)
         except FileNotFoundError as e:
-            showerror('decryptFile()', str(e))
+            showerror('decryptFile()', "파일경로를 지정하지 않았습니다.")
                
     def encodeFile(self, *args):
         iF = self.iFileEnt.get()
@@ -327,9 +327,9 @@ class App(tk.Frame):
                     plaintext = txtWidget.get(1.0,'end')
                     #encryptFile
                     if self.typeAesBlw.get() == 'aes':
-                        encrytext = self.encryptAes(plaintext, 'utf-8')
+                        encrytext = self.encryptAes(plaintext.encode('utf-8') , 'utf-8')
                     elif self.typeAesBlw.get() == 'blowfish':
-                        encrytext = self.encryptBlow(plaintext, 'utf-8')
+                        encrytext = self.encryptBlow(plaintext.encode('utf-8'), 'utf-8')
                     fOut.write(encrytext)
             except FileNotFoundError as e:
                 showerror('File error', e)
@@ -516,14 +516,14 @@ class App(tk.Frame):
         #
         frButt = tk.Frame(frame, bg=bs.theme.light)
         frButt.grid(row=2, sticky='we', pady=5)
-        bOverwrite = tk.Button(frButt, text='파일 덮어쓰기', 
+        bOverwrite = tk.Button(frButt, text='입력파일로 저장', 
                                width=14, bg=bs.theme.light, fg='red',
                                command=(lambda arg1=txtEdit, arg2='overwrite': 
                                         self.save(arg1, arg2)))
         bOverwrite.grid(row=0, column=0, padx=5)
         bOverwriteTip = ('Encrypts and OVERWRITES input file')
         wckToolTips.register(bOverwrite, bOverwriteTip)
-        bSaveCopy = tk.Button(frButt, text='복사본 저장', 
+        bSaveCopy = tk.Button(frButt, text='출력파일로 저장', 
                               width=14, bg=bs.theme.light, 
                               command=(lambda arg1=txtEdit, arg2='savecopy':
                                        self.save(arg1, arg2)))
@@ -595,7 +595,7 @@ class App(tk.Frame):
         labEncodingTitle = tk.Label(frEncoding, text='인코딩', font="bold", 
                                     bg=bs.theme.darkest, fg='white')
         labEncodingTitle.grid(row=0, sticky='we', columnspan=2)
-        txt = 'base64 인코딩/디코딩                        percent 인코딩/디코딩'
+        txt = 'base64 인코딩/디코딩                        URL 인코딩/디코딩'
 
         labEncodingInfo = tk.Label(frEncoding, text=txt, anchor='w', 
                                    bg=bs.theme.lightest, fg=bs.theme.dark)
