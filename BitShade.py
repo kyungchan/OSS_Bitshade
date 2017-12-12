@@ -30,6 +30,7 @@ import wckToolTips
 import hashlib
 import base64
 from urllib.parse import quote
+from urllib.parse import quote_plus
 from urllib.parse import unquote
 from Crypto.Cipher import Blowfish
 from subprocess import call
@@ -249,7 +250,7 @@ class App(tk.Frame):
             try:
                 with open(iF, "rb") as fIn, open(oF, "wb") as fOut:
                     base64.encode(fIn, fOut)
-                    tkinter.messagebox.showinfo("알림!","인코딩을 완료하였습니다.")
+                    tkinter.messagebox.showinfo("알림!","BASE64 인코딩을 완료하였습니다.")
             except FileNotFoundError as e:
                 showerror('File Error', e)
         else:
@@ -262,11 +263,12 @@ class App(tk.Frame):
             try:
                    fIn = open(iF, "r")  
                    fOut = open(oF, "w")
-                   a=fIn.readline()
-                   b= quote(a)
-                   fOut.write(b)
+                   a=fIn.readlines()
+                   for x in a:
+                       fOut.write(quote_plus(x))
+                       print(quote_plus(x))
                    fOut.close()
-                   tkinter.messagebox.showinfo("알림!","인코딩을 완료하였습니다.")
+                   tkinter.messagebox.showinfo("알림!","URL 인코딩을 완료하였습니다.")
             except FileNotFoundError as e:
                 showerror('File Error', e)
         else:
@@ -280,7 +282,7 @@ class App(tk.Frame):
             try:
                 with open(iF, "rb") as fIn, open(oF, "wb") as fOut:
                     base64.decode(fIn, fOut)
-                    tkinter.messagebox.showinfo("알림!","디코딩을 완료하였습니다.")
+                    tkinter.messagebox.showinfo("알림!","BASE64 디코딩을 완료하였습니다.")
             except Exception as e:
                 showerror('', e)
         else:
@@ -294,11 +296,12 @@ class App(tk.Frame):
             try:
                    fIn = open(iF, "r")  
                    fOut = open(oF, "w")
-                   a=fIn.readline()
-                   b= unquote(a)
-                   fOut.write(b)
+                   a=fIn.readlines()
+                   for x in a:
+                       fOut.write(unquote(x))
+                       print(unquote(x))
                    fOut.close()
-                   tkinter.messagebox.showinfo("알림!","디코딩을 완료하였습니다.")
+                   tkinter.messagebox.showinfo("알림!","URL 디코딩을 완료하였습니다.")
             except Exception as e:
                 showerror('', e)
         else:
